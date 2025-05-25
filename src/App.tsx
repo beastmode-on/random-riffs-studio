@@ -1,30 +1,26 @@
 import React from 'react';
-import { Toaster } from "@/components/ui/toaster";
-import { Toaster as Sonner } from "@/components/ui/sonner";
-import { TooltipProvider } from "@/components/ui/tooltip";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
-import Index from "./pages/Index";
-import NotFound from "./pages/NotFound";
-import MusicDemo from './components/MusicDemo';
+import './App.css';
+import MelodyGenerator from './components/MelodyGenerator';
 
-const queryClient = new QueryClient();
-
-const App = () => (
-  <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/music-demo" element={<MusicDemo />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
-  </QueryClientProvider>
-);
+function App() {
+  return (
+    <div className="min-h-screen py-8 px-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-slate-400 mb-8 text-center">
+          <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400 mb-2">
+            Random Riffs Studio
+          </h1>
+          <p className="text-sm opacity-75">
+            Project by{' '}
+            <span className="text-purple-400">KARAN BISHT</span>,{' '}
+            <span className="text-blue-400">MAYANK BISHT</span>,{' '}
+            <span className="text-indigo-400">AKASH KUMAR</span>
+          </p>
+        </div>
+        <MelodyGenerator />
+      </div>
+    </div>
+  );
+}
 
 export default App;
