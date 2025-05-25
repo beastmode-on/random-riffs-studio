@@ -1,11 +1,19 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Play, Pause, RotateCcw } from 'lucide-react';
+import { Play, Pause, RotateCcw, Settings2 } from 'lucide-react';
 import PianoKeyboard from './PianoKeyboard';
-import { generateMelody, createAudioContext, playNote } from '@/utils/musicUtils';
+import { createAudioContext, playNote } from '@/utils/musicUtils';
+import { generateGraphMelody, scales } from '@/utils/graphMusicUtils';
+import GraphVisualizer from './GraphVisualizer';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const MelodyGenerator = () => {
   const [isPlaying, setIsPlaying] = useState(false);
@@ -13,12 +21,13 @@ const MelodyGenerator = () => {
   const [currentNoteIndex, setCurrentNoteIndex] = useState(-1);
   const [melody, setMelody] = useState<Array<{note: string, frequency: number}>>([]);
   const [audioContext, setAudioContext] = useState<AudioContext | null>(null);
+  const [selectedScale, setSelectedScale] = useState<string>("pentatonic");
+  const [melodyLength, setMelodyLength] = useState([8]);
   
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const noteTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    // Initialize audio context and generate first melody
     const initAudio = async () => {
       const ctx = createAudioContext();
       setAudioContext(ctx);
@@ -34,10 +43,10 @@ const MelodyGenerator = () => {
   }, []);
 
   const generateNewMelody = () => {
-    const newMelody = generateMelody();
+    const newMelody = generateGraphMelody(melodyLength[0], selectedScale);
     setMelody(newMelody);
     setCurrentNoteIndex(-1);
-    console.log('Generated new melody:', newMelody);
+    console.log('Generated new graph-based melody:', newMelody);
   };
 
   const startPlayback = () => {
@@ -99,8 +108,18 @@ const MelodyGenerator = () => {
     }
   };
 
+  // Handle scale change
+  const handleScaleChange = (newScale: string) => {
+    setSelectedScale(newScale);
+    stopPlayback();
+    setTimeout(() => {
+      const newMelody = generateGraphMelody(melodyLength[0], newScale);
+      setMelody(newMelody);
+    }, 100);
+  };
+
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
+    <div className="max-w-6xl mx-auto space-y-6">
       {/* Control Panel */}
       <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
         <CardHeader>
@@ -138,21 +157,68 @@ const MelodyGenerator = () => {
             </Button>
           </div>
 
-          <div className="space-y-3">
-            <label className="text-slate-300 text-sm font-medium block">
-              Tempo: {tempo[0]} BPM
-            </label>
-            <Slider
-              value={tempo}
-              onValueChange={setTempo}
-              max={180}
-              min={60}
-              step={5}
-              className="w-full"
-            />
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* Tempo Control */}
+            <div className="space-y-3">
+              <label className="text-slate-300 text-sm font-medium block">
+                Tempo: {tempo[0]} BPM
+              </label>
+              <Slider
+                value={tempo}
+                onValueChange={setTempo}
+                max={180}
+                min={60}
+                step={5}
+                className="w-full"
+              />
+            </div>
+
+            {/* Scale Selection */}
+            <div className="space-y-3">
+              <label className="text-slate-300 text-sm font-medium block">
+                Musical Scale
+              </label>
+              <Select
+                value={selectedScale}
+                onValueChange={handleScaleChange}
+              >
+                <SelectTrigger className="w-full bg-slate-700 border-slate-600">
+                  <SelectValue placeholder="Select Scale" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.keys(scales).map((scale) => (
+                    <SelectItem key={scale} value={scale}>
+                      {scale.charAt(0).toUpperCase() + scale.slice(1)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Melody Length Control */}
+            <div className="space-y-3">
+              <label className="text-slate-300 text-sm font-medium block">
+                Melody Length: {melodyLength[0]} notes
+              </label>
+              <Slider
+                value={melodyLength}
+                onValueChange={setMelodyLength}
+                max={16}
+                min={4}
+                step={1}
+                className="w-full"
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
+
+      {/* Graph Visualization */}
+      <GraphVisualizer 
+        melody={melody}
+        currentNoteIndex={currentNoteIndex}
+        scale={selectedScale}
+      />
 
       {/* Piano Keyboard */}
       <Card className="bg-slate-800/50 border-slate-700 backdrop-blur-sm">
