@@ -1,4 +1,3 @@
-
 // Music theory and audio utilities
 
 export interface Note {
@@ -25,7 +24,24 @@ const scales = {
 
 export const createAudioContext = (): AudioContext => {
   const AudioContext = window.AudioContext || (window as any).webkitAudioContext;
-  return new AudioContext();
+  const ctx = new AudioContext();
+  
+  // Fix for Safari WebKit error 305
+  if (ctx.state === 'suspended') {
+    const resumeAudioContext = () => {
+      ctx.resume().then(() => {
+        document.removeEventListener('touchstart', resumeAudioContext);
+        document.removeEventListener('touchend', resumeAudioContext);
+        document.removeEventListener('click', resumeAudioContext);
+      });
+    };
+
+    document.addEventListener('touchstart', resumeAudioContext);
+    document.addEventListener('touchend', resumeAudioContext);
+    document.addEventListener('click', resumeAudioContext);
+  }
+  
+  return ctx;
 };
 
 export const playNote = (audioContext: AudioContext, frequency: number, duration: number = 0.5) => {

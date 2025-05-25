@@ -49,8 +49,13 @@ const MelodyGenerator = () => {
     console.log('Generated new graph-based melody:', newMelody);
   };
 
-  const startPlayback = () => {
+  const startPlayback = async () => {
     if (!audioContext || melody.length === 0) return;
+
+    // Ensure audio context is running
+    if (audioContext.state === 'suspended') {
+      await audioContext.resume();
+    }
 
     setIsPlaying(true);
     setCurrentNoteIndex(0);
