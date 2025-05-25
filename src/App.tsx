@@ -6,7 +6,7 @@ function App() {
   return (
     <div className="min-h-screen py-8 px-4">
       <div className="max-w-6xl mx-auto">
-        <div className="text-slate-400 mb-8 text-center">
+        <div className="credits text-slate-400 mb-8 text-center">
           <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-blue-400 mb-2">
             Random Riffs Studio
           </h1>
